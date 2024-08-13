@@ -1,13 +1,13 @@
 export enum Lanauge {
-  English = 'english',
-  Chinese = 'chinese',
-  Spanish = 'spanish',
-  Russian = 'russian',
-  German = 'german',
-  Japan = 'japan',
-  Dutch = 'dutch',
-  French = 'french',
-  Italian = 'italian',
+  English = 'English',
+  Chinese = 'Chinese',
+  Spanish = 'Spanish',
+  Russian = 'Russian',
+  German = 'German',
+  Japan = 'Japan',
+  Dutch = 'Dutch',
+  French = 'French',
+  Italian = 'Italian',
 }
 
 export enum InterviewType {
