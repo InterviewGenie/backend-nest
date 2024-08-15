@@ -4,6 +4,8 @@ import { Interview } from './schema/interview.schema';
 import { Model, ObjectId } from 'mongoose';
 import { InterviewDto } from 'src/shared/dto/interview.dto';
 import { User } from 'src/users/schema/user.schema';
+import { HelpMeDto } from 'src/shared/dto/help.dto';
+import { groq } from 'src/shared/constant';
 
 @Injectable()
 export class InterviewService {
@@ -32,5 +34,27 @@ export class InterviewService {
     user.interviews.push(createdInterview);
     await user.save();
     return createdInterview.save();
+  }
+
+  async helpMe(helpMeDto: HelpMeDto, userId: ObjectId): Promise<string> {
+    console.log(userId);
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: 'user',
+          content: helpMeDto.query,
+        },
+      ],
+      model: 'llama3-8b-8192',
+    });
+
+    return completion.choices[0].message.content;
+
+    // const completion = await openai.chat.completions.create({
+    //   messages: [{ role: "system", content: "You are a helpful assistant." }],
+    //   model: "gpt-4o-mini",
+    // });
+
+    // return completion.choices[0].message.content;
   }
 }
