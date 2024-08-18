@@ -25,6 +25,13 @@ export class User extends Document {
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Interview' }] })
   interviews: Interview[];
+
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Interview',
+    default: null,
+  })
+  activeInterview: Interview;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

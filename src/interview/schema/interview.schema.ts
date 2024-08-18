@@ -1,6 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Date, HydratedDocument, Document } from 'mongoose';
-import { Lanauge, InterviewType } from 'src/shared/constant';
+import {
+  Date,
+  HydratedDocument,
+  Document,
+  Schema as MongooseSchema,
+} from 'mongoose';
+import {
+  Lanauge,
+  InterviewType,
+  InterviewStatusType,
+} from 'src/shared/constant';
+import { User } from 'src/users/schema/user.schema';
+import { Feedback } from './feedback.schema';
 
 export type InterviewDocument = HydratedDocument<Interview>;
 
@@ -37,6 +48,19 @@ export class Interview extends Document {
 
   @Prop([String])
   keywords: string[];
+
+  @Prop({
+    required: true,
+    enum: Object.values(InterviewStatusType),
+    default: InterviewStatusType.Initiated,
+  })
+  status: string;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  interviewee: User;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Feedback' })
+  feedback: Feedback;
 
   @Prop({ type: Date, default: Date.now() })
   createdAT: Date;

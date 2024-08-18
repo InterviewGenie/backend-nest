@@ -31,3 +31,10 @@ export enum InterviewType {
   Tech = 'tech',
   Behavioral = 'behavioral',
 }
+
+export enum InterviewStatusType {
+  Initiated = 'Initiated',
+  Started = 'Started',
+  Finished = 'Finished',
+  Archived = 'Archived',
+}

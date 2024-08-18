@@ -1,4 +1,5 @@
-import { Lanauge, InterviewType } from '../constant';
+import { ObjectId } from 'mongoose';
+import { Lanauge, InterviewType, InterviewStatusType } from '../constant';
 
 export class InterviewDto {
   senario: InterviewType;
@@ -9,4 +10,11 @@ export class InterviewDto {
   cv: string;
   instruction: string;
   keywords: string[];
+  status: InterviewStatusType;
+}
+
+export class FeedbackInterviewDto {
+  _id: ObjectId;
+  rating: number;
+  text?: string;
 }

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { User } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { AuthUserDto } from 'src/shared/dto/auth.dto';
@@ -12,7 +12,16 @@ export class UsersService {
     return this.userModel.findOne({ email });
   }
 
-  async create(signUpDto: AuthUserDto): Promise<User> {
+  async getUser(userId: ObjectId): Promise<any> {
+    /* eslint-disable */
+    const { __v, password, interviews, ...result } = (
+      await this.userModel.findById(userId)
+    ).toObject();
+    /* eslint-enable */
+    return result;
+  }
+
+  async signUp(signUpDto: AuthUserDto): Promise<User> {
     const existingUser = await this.userModel.findOne({
       email: signUpDto.email,
     });
