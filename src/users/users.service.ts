@@ -15,7 +15,7 @@ export class UsersService {
   async getUser(userId: ObjectId): Promise<any> {
     /* eslint-disable */
     const { __v, password, interviews, ...result } = (
-      await this.userModel.findById(userId)
+      await this.userModel.findById(userId).populate('activeInterview')
     ).toObject();
     /* eslint-enable */
     return result;
