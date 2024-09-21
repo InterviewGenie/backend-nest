@@ -18,3 +18,8 @@ export class FeedbackInterviewDto {
   rating: number;
   text?: string;
 }
+
+export class InterviewScriptDto {
+  speaker: string;
+  script: string;
+}

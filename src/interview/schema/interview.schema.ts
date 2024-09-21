@@ -12,6 +12,7 @@ import {
 } from 'src/shared/constant';
 import { User } from 'src/users/schema/user.schema';
 import { Feedback } from './feedback.schema';
+import { InterviewScriptDto } from 'src/shared/dto/interview.dto';
 
 export type InterviewDocument = HydratedDocument<Interview>;
 
@@ -61,6 +62,9 @@ export class Interview extends Document {
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Feedback' })
   feedback: Feedback;
+
+  @Prop({ type: [InterviewScriptDto], default: [] })
+  script: InterviewScriptDto[];
 
   @Prop({ type: Date, default: Date.now() })
   createdAT: Date;

@@ -12,6 +12,7 @@ import { InterviewService } from './interview.service';
 import {
   FeedbackInterviewDto,
   InterviewDto,
+  InterviewScriptDto,
 } from 'src/shared/dto/interview.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { HelpMeDto } from 'src/shared/dto/help.dto';
@@ -88,5 +89,12 @@ export class InterviewController {
   @Post('help-me')
   helpMe(@Request() req, @Body() helpMeDto: HelpMeDto) {
     return this.interviewService.helpMe(helpMeDto, req.user._id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @Post('script')
+  saveScript(@Request() req, @Body() scriptDto: InterviewScriptDto) {
+    return this.interviewService.saveScript(scriptDto, req.user._id);
   }
 }

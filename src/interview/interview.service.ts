@@ -6,6 +6,7 @@ import { Model, ObjectId, UpdateWriteOpResult } from 'mongoose';
 import {
   FeedbackInterviewDto,
   InterviewDto,
+  InterviewScriptDto,
 } from 'src/shared/dto/interview.dto';
 import { User } from 'src/users/schema/user.schema';
 import { HelpMeDto } from 'src/shared/dto/help.dto';
@@ -120,7 +121,7 @@ export class InterviewService {
     );
   }
 
-  async helpMe(helpMeDto: HelpMeDto, userId: ObjectId): Promise<string> {
+  async helpMe(helpMeDto: HelpMeDto, userId: ObjectId): Promise<string[]> {
     console.log(userId);
     const completion = await groq.chat.completions.create({
       messages: [
@@ -132,7 +133,7 @@ export class InterviewService {
       model: 'llama3-8b-8192',
     });
 
-    return completion.choices[0].message.content;
+    return [completion.choices[0].message.content];
 
     // const completion = await openai.chat.completions.create({
     //   messages: [{ role: "system", content: "You are a helpful assistant." }],
@@ -140,5 +141,25 @@ export class InterviewService {
     // });
 
     // return completion.choices[0].message.content;
+  }
+
+  async saveScript(
+    scriptDto: InterviewScriptDto,
+    userId: ObjectId,
+  ): Promise<{ success: boolean }> {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new Error('User not found'); // Handle user not found case
+    }
+    const activeInterview = await this.interviewModel.findById(
+      user.activeInterview,
+    );
+    if (activeInterview) {
+      activeInterview.script.push(scriptDto);
+    } else {
+      return { success: false };
+    }
+    await activeInterview.save();
+    return { success: true };
   }
 }
