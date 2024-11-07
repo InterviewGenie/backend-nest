@@ -1,12 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Interview } from './schema/interview.schema';
-import { Feedback } from './schema/feedback.schema';
-import { Model, ObjectId, UpdateWriteOpResult } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import {
   FeedbackInterviewDto,
   InterviewDto,
-  InterviewScriptDto,
+  InterviewSpeechDto,
 } from 'src/shared/dto/interview.dto';
 import { User } from 'src/users/schema/user.schema';
 import { HelpMeDto } from 'src/shared/dto/help.dto';
@@ -17,7 +16,6 @@ export class InterviewService {
   constructor(
     @InjectModel(Interview.name) private interviewModel: Model<Interview>,
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Feedback.name) private feedbackModel: Model<Feedback>,
   ) {}
 
   async getInterviews(userId: ObjectId): Promise<Interview[]> {
@@ -33,6 +31,7 @@ export class InterviewService {
   async startInterview(
     userId: ObjectId,
     interviewId: ObjectId,
+    interviewLink: string,
   ): Promise<Interview> {
     const user = await this.userModel.findById(userId);
     const interview = await this.interviewModel.findOne({
@@ -42,6 +41,7 @@ export class InterviewService {
     user.activeInterview = interview;
     user.save();
     interview.status = InterviewStatusType.Started;
+    interview.link = interviewLink;
     return interview.save();
   }
 
@@ -76,58 +76,57 @@ export class InterviewService {
 
   async feedbackInterview(
     userId: ObjectId,
-    feedbackInterviewDto: FeedbackInterviewDto,
+    feedbackInterview: {
+      interviewId: ObjectId;
+      feedback: FeedbackInterviewDto;
+    },
   ): Promise<Interview> {
     const user = await this.userModel.findById(userId);
     const interview = await this.interviewModel.findOne({
-      _id: feedbackInterviewDto._id,
+      _id: feedbackInterview.interviewId,
       interviewee: user,
     });
-    interview.feedback = new this.feedbackModel({
-      rating: feedbackInterviewDto.rating,
-      text: feedbackInterviewDto.text,
-    });
+    interview.feedback = feedbackInterview.feedback;
     interview.status = InterviewStatusType.Archived;
     user.activeInterview = null;
     user.save();
     return interview.save();
   }
 
-  async create(
-    interviewDto: InterviewDto,
-    userId: ObjectId,
-  ): Promise<Interview> {
-    const newInterview = new this.interviewModel(interviewDto);
+  async upsert(userId: ObjectId, interview: InterviewDto): Promise<Interview> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    user.interviews.push(newInterview);
-    newInterview.interviewee = user;
-    await user.save();
-    return newInterview.save();
+    if (interview._id) {
+      // Update the existing interview
+      const updatedInterview = await this.interviewModel.findOneAndUpdate(
+        { _id: interview._id, interviewee: userId },
+        { ...interview },
+        { new: true }, // Returns the updated document
+      );
+
+      if (!updatedInterview) {
+        throw new NotFoundException('Interview not found');
+      }
+      return updatedInterview;
+    } else {
+      // Create a new interview if no _id is provided
+      const newInterview = new this.interviewModel(interview);
+      user.interviews.push(newInterview);
+      newInterview.interviewee = user;
+      await user.save();
+      return newInterview.save();
+    }
   }
 
-  async update(
-    userId: ObjectId,
-    interviewId: ObjectId,
-    interviewData: InterviewDto,
-  ): Promise<UpdateWriteOpResult> {
-    return await this.interviewModel.updateOne(
-      { _id: interviewId, interviewee: userId },
-      {
-        ...interviewData,
-      },
-    );
-  }
-
-  async helpMe(helpMeDto: HelpMeDto, userId: ObjectId): Promise<string[]> {
-    console.log(userId);
+  async helpMe(helpMe: HelpMeDto, userId: ObjectId): Promise<string[]> {
+    console.log('userId', userId);
     const completion = await groq.chat.completions.create({
       messages: [
         {
           role: 'user',
-          content: helpMeDto.query,
+          content: helpMe.query,
         },
       ],
       model: 'llama3-8b-8192',
@@ -143,8 +142,8 @@ export class InterviewService {
     // return completion.choices[0].message.content;
   }
 
-  async saveScript(
-    scriptDto: InterviewScriptDto,
+  async saveSpeech(
+    speech: InterviewSpeechDto,
     userId: ObjectId,
   ): Promise<{ success: boolean }> {
     const user = await this.userModel.findById(userId);
@@ -155,7 +154,7 @@ export class InterviewService {
       user.activeInterview,
     );
     if (activeInterview) {
-      activeInterview.script.push(scriptDto);
+      activeInterview.script.push(speech);
     } else {
       return { success: false };
     }

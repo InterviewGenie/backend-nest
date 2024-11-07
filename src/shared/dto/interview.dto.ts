@@ -2,24 +2,25 @@ import { ObjectId } from 'mongoose';
 import { Lanauge, InterviewType, InterviewStatusType } from '../constant';
 
 export class InterviewDto {
+  _id?: ObjectId;
   senario: InterviewType;
   position: string;
   company: string;
   language: Lanauge;
-  schedule: Date;
+  time: Date;
   cv: string;
-  instruction: string;
+  jd: string;
   keywords: string[];
   status: InterviewStatusType;
 }
 
 export class FeedbackInterviewDto {
-  _id: ObjectId;
   rating: number;
   text?: string;
 }
 
-export class InterviewScriptDto {
+export class InterviewSpeechDto {
+  isMe: boolean;
   speaker: string;
-  script: string;
+  speech: string;
 }

@@ -11,8 +11,10 @@ import {
   InterviewStatusType,
 } from 'src/shared/constant';
 import { User } from 'src/users/schema/user.schema';
-import { Feedback } from './feedback.schema';
-import { InterviewScriptDto } from 'src/shared/dto/interview.dto';
+import {
+  FeedbackInterviewDto,
+  InterviewSpeechDto,
+} from 'src/shared/dto/interview.dto';
 
 export type InterviewDocument = HydratedDocument<Interview>;
 
@@ -39,13 +41,13 @@ export class Interview extends Document {
   language: string;
 
   @Prop({ type: Date, required: true })
-  schedule: Date;
+  time: Date;
 
   @Prop()
   cv: string;
 
   @Prop()
-  instruction: string;
+  jd: string;
 
   @Prop([String])
   keywords: string[];
@@ -57,14 +59,17 @@ export class Interview extends Document {
   })
   status: string;
 
+  @Prop()
+  link: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   interviewee: User;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Feedback' })
-  feedback: Feedback;
+  @Prop({ type: FeedbackInterviewDto })
+  feedback: FeedbackInterviewDto;
 
-  @Prop({ type: [InterviewScriptDto], default: [] })
-  script: InterviewScriptDto[];
+  @Prop({ type: [InterviewSpeechDto], default: [] })
+  script: InterviewSpeechDto[];
 
   @Prop({ type: Date, default: Date.now() })
   createdAT: Date;
